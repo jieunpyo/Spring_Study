@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+		
+	<!-- 
+		히카리 커넥션 풀 빈 등록설정
+	 -->
+	
+	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+	
+		<property name="driverClassName" value="oracle.jdbc.OracleDriver" />
+		<property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:xe" />
+		<property name="username" value="C##SPRINGUSER" />
+		<property name="password" value="spring123" />
+	
+	</bean>
+	
+	<!-- 
+		히카리데이터소스 빈 등록설정
+	 -->
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
+		<constructor-arg ref="hikariConfig" />
+	</bean>
+	
+	<!-- 
+		마이바티스 SQL 동작을 위한 SqlSessionFactoryBean 클래스 빈 등록설정
+	 -->
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath:/mappers/**/*Mapper.xml" />
+	</bean>
+	
+	<!-- 
+		스프링이 해당 패키지의 인터페이스를 mapper로 인식하도록 하는 스캔설정
+	 -->
+	
+	<mybatis-spring:scan base-package="com.spring.web.board.mapper"/>
+	
+</beans>
+
+
+
+
+
+
+
+
+
+

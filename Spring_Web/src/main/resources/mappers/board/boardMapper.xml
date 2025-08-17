@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.web.board.mapper.BoardMapper">
+	
+	<!-- 
+		DB 컬럼과 DTO 프로퍼티를 맵핑시켜주기 위한 ResultMap 선언
+	 -->
+	 
+	 <resultMap id="boardMap" type="com.spring.web.board.dto.BoardDTO" >
+	 	
+	 	<id property="id" column="ID" /><!-- primary key 맵핑 -->
+	 	<result property="writer" column="WRITER" />
+	 	<result property="title" column="TITLE" />
+	 	<result property="content" column="CONTENT" />
+	 	<result property="regDate" column="REG_DATE" />
+	 	<result property="viewCount" column="VIEW_COUNT" />
+	 	
+	 </resultMap>
+	 
+	 <select id="totalCount" resultType="int">
+	 	
+	 	<choose>
+	 		
+	 		<when test="searchWord == 'writer' or searchWord == 'title' 
+	 											or searchWord == 'content'">
+	 		
+	 			SELECT COUNT(*) FROM BOARD WHERE ${searchWord} LIKE '%' || #{key} || '%'
+	 		
+	 		</when>
+	 		
+	 		<otherwise>
+	 			SELECT COUNT(*) FROM BOARD
+	 		</otherwise>
+	 		
+	 	</choose>	
+	 
+	 </select>
+	
+	
+	<select id="boardList" resultMap="boardMap" >
+	
+		<choose>
+		
+			<when test="searchWord == 'writer' or searchWord == 'title' 
+	 											or searchWord == 'content'">
+	 				
+	 				SELECT * FROM
+					    (
+					    SELECT ROWNUM NUM, B.* FROM
+					        (
+					        SELECT * FROM BOARD 
+					        WHERE ${searchWord} LIKE '%' || #{key} || '%'
+					        ORDER BY ID DESC
+					        ) B
+					    )
+					WHERE NUM BETWEEN ${postStart} AND ${postEnd}						
+	 				
+	 		</when>
+			
+			<otherwise>
+				SELECT * FROM
+				    (
+				    SELECT ROWNUM NUM, B.* FROM
+				        (
+				        SELECT * FROM BOARD 
+				        ORDER BY ID DESC
+				        ) B
+				    )
+				WHERE NUM BETWEEN ${postStart} AND ${postEnd}
+			</otherwise>
+			
+		</choose>
+		
+	</select>
+	
+	<!-- 
+		SELECT * FROM BOARD ORDER BY ID DESC
+		ID	NUMBER(4,0)
+		WRITER	NVARCHAR2(20 CHAR)
+		TITLE	NVARCHAR2(100 CHAR)
+		CONTENT	NVARCHAR2(500 CHAR)
+		REG_DATE	TIMESTAMP(6)
+		VIEW_COUNT	NUMBER(4,0)
+		
+		private Integer id;
+		private String writer;
+		private String title;
+		private String content;
+		private Timestamp regDate;
+		private Integer viewCount;
+	 -->
+	<!-- #{} 는 자동적으로 작은따옴표('')가 붙는다. -->
+	<insert id="write">
+		INSERT INTO BOARD(ID, WRITER, TITLE, CONTENT) 
+		VALUES(BOARD_SEQ.NEXTVAL, #{writer}, #{title}, #{content})
+	</insert>
+	
+	<select id="getContent" resultMap="boardMap">
+		SELECT * FROM BOARD WHERE ID = #{id}
+	</select>
+	
+	
+	<update id="upViewCount">
+		UPDATE BOARD SET VIEW_COUNT = VIEW_COUNT + 1
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="boardUpdate">
+		UPDATE BOARD SET TITLE = #{title}, CONTENT = #{content}
+		WHERE ID = #{id}
+	</update>
+	
+	<delete id="boardDelete">
+		
+		DELETE FROM BOARD WHERE ID = #{id}
+		
+	</delete>
+	
+</mapper>
+
+
+
+
+
+
